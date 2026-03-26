@@ -355,7 +355,7 @@ export async function handleTaskTool(name: string, args: ToolArgs) {
 
       const descData = await runrunitFetch(`/tasks/${task_id}/description`, {
         method: "PUT",
-        body: JSON.stringify({ description: { body } }),
+        body: JSON.stringify({ task_description: { description: body } }),
       });
 
       return {
