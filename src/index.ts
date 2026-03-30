@@ -9,6 +9,7 @@ import { taskToolDefinitions, handleTaskTool } from "./tools/tasks.js";
 import { userToolDefinitions, handleUserTool } from "./tools/users.js";
 import { projectToolDefinitions, handleProjectTool } from "./tools/projects.js";
 import { timeToolDefinitions, handleTimeTool } from "./tools/time.js";
+import { excelToolDefinitions, handleExcelTool } from "./tools/excel.js";
 
 const server = new Server(
   { name: "runrunit-mcp", version: "1.0.0" },
@@ -20,12 +21,14 @@ const allToolDefinitions = [
   ...userToolDefinitions,
   ...projectToolDefinitions,
   ...timeToolDefinitions,
+  ...excelToolDefinitions,
 ];
 
 const taskToolNames: Set<string> = new Set(taskToolDefinitions.map((t) => t.name));
 const userToolNames: Set<string> = new Set(userToolDefinitions.map((t) => t.name));
 const projectToolNames: Set<string> = new Set(projectToolDefinitions.map((t) => (t as { name: string }).name));
 const timeToolNames: Set<string> = new Set(timeToolDefinitions.map((t) => (t as { name: string }).name));
+const excelToolNames: Set<string> = new Set(excelToolDefinitions.map((t) => (t as { name: string }).name));
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: allToolDefinitions,
@@ -38,9 +41,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     if (taskToolNames.has(name)) return await handleTaskTool(name, toolArgs);
     if (userToolNames.has(name)) return await handleUserTool(name, toolArgs);
-    if (projectToolNames.has(name))
-      return await handleProjectTool(name, toolArgs);
+    if (projectToolNames.has(name)) return await handleProjectTool(name, toolArgs);
     if (timeToolNames.has(name)) return await handleTimeTool(name, toolArgs);
+    if (excelToolNames.has(name)) return await handleExcelTool(name, toolArgs);
     throw new Error(`Unknown tool: ${name}`);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

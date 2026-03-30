@@ -58,6 +58,13 @@ export interface RunrunitProject {
   id: number;
   name: string;
   client_name?: string;
+  is_closed?: boolean;
+  total_tasks?: number;
+  total_closed_tasks?: number;
+  time_worked?: number;
+  estimated_time?: number;
+  desired_date?: string;
+  desired_start_date?: string;
   [key: string]: unknown;
 }
 
@@ -69,6 +76,15 @@ export interface RunrunitTimeEntry {
   date: string;
   description?: string;
   created_at?: string;
+  [key: string]: unknown;
+}
+
+export interface RunrunitTeam {
+  id: number;
+  name: string;
+  user_ids?: string[];
+  board_id?: number;
+  leader_id?: string;
   [key: string]: unknown;
 }
 

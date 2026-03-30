@@ -1,4 +1,4 @@
-import { runrunitFetch, type RunrunitUser } from "../client.js";
+import { runrunitFetch, type RunrunitUser, type RunrunitTeam } from "../client.js";
 
 // ─── Tool definitions ─────────────────────────────────────────────────────────
 
@@ -26,6 +26,14 @@ export const userToolDefinitions = [
           description: "Number of users to return",
         },
       },
+    },
+  },
+  {
+    name: "list_teams",
+    description: "List all teams in the organization, including their members and board",
+    inputSchema: {
+      type: "object",
+      properties: {},
     },
   },
 ] as const;
@@ -71,6 +79,29 @@ export async function handleUserTool(name: string, args: ToolArgs) {
           {
             type: "text",
             text: JSON.stringify(userList.map(simplifyUser), null, 2),
+          },
+        ],
+      };
+    }
+
+    case "list_teams": {
+      const teams = (await runrunitFetch("/teams")) ?? [];
+      const teamList = Array.isArray(teams) ? (teams as RunrunitTeam[]) : [];
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              teamList.map((t) => ({
+                id: t.id,
+                name: t.name,
+                leader_id: t.leader_id,
+                board_id: t.board_id,
+                member_ids: t.user_ids ?? [],
+              })),
+              null,
+              2,
+            ),
           },
         ],
       };

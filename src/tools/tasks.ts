@@ -60,6 +60,22 @@ export const taskToolDefinitions = [
           type: "boolean",
           description: "Filter by closed status",
         },
+        board_stage_id: {
+          type: "number",
+          description: "Filter by board stage (kanban column) ID",
+        },
+        overdue: {
+          type: "boolean",
+          description: "Filter only overdue tasks",
+        },
+        completed_since: {
+          type: "string",
+          description: "Return tasks completed after this datetime (ISO 8601, e.g. '2026-03-01T00:00:00Z')",
+        },
+        completed_before: {
+          type: "string",
+          description: "Return tasks completed before this datetime (ISO 8601, e.g. '2026-03-31T23:59:59Z')",
+        },
         sort_by: {
           type: "string",
           description: "Field to sort by, e.g. 'created_at', 'estimated_delivery_date'",
@@ -155,6 +171,10 @@ export const taskToolDefinitions = [
           type: "boolean",
           description: "Mark or unmark as urgent",
         },
+        points: {
+          type: "number",
+          description: "Scrum points for the task",
+        },
       },
       required: ["id"],
     },
@@ -171,6 +191,24 @@ export const taskToolDefinitions = [
         },
       },
       required: ["task_id"],
+    },
+  },
+  {
+    name: "assign_task_user",
+    description: "Assign a user to a task in Runrun.it",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task_id: {
+          type: "number",
+          description: "The ID of the task",
+        },
+        assignee_id: {
+          type: "string",
+          description: "ID (slug) of the user to assign, e.g. 'mario-neto'",
+        },
+      },
+      required: ["task_id", "assignee_id"],
     },
   },
   {
@@ -317,7 +355,7 @@ export async function handleTaskTool(name: string, args: ToolArgs) {
       const updatableFields = [
         "title", "responsible_id", "team_id", "board_stage_id",
         "estimated_delivery_date", "current_estimate_seconds",
-        "is_closed", "is_urgent",
+        "is_closed", "is_urgent", "points",
       ] as const;
       for (const field of updatableFields) {
         if (args?.[field] !== undefined) body[field] = args[field];
@@ -332,6 +370,22 @@ export async function handleTaskTool(name: string, args: ToolArgs) {
         content: [
           { type: "text", text: JSON.stringify(simplifyTask(task), null, 2) },
         ],
+      };
+    }
+
+    case "assign_task_user": {
+      const task_id = args?.["task_id"] as number | undefined;
+      const assignee_id = args?.["assignee_id"] as string | undefined;
+      if (!task_id) throw new Error("task_id is required");
+      if (!assignee_id) throw new Error("assignee_id is required");
+
+      const data = await runrunitFetch(`/tasks/${task_id}/assignments`, {
+        method: "POST",
+        body: JSON.stringify({ task_assignment: { assignee_id } }),
+      });
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
       };
     }
 
