@@ -74,6 +74,7 @@ tests/
 | `list_tasks` | tasks | Lista tasks com filtros: responsible_id, project_id, team_id, is_closed, sort_by, page, limit |
 | `create_task` | tasks | Cria nova task (obrig: title, project_id) |
 | `update_task` | tasks | Atualiza task existente (obrig: id) |
+| `update_task_description` | description | Atualiza o texto/corpo da descrição de uma task |
 | `list_projects` | projects | Lista projetos disponíveis |
 | `get_me` | users | Dados do usuário autenticado |
 | `list_users` | users | Lista usuários do time (filtros: team_id, limit) |
