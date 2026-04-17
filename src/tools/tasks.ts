@@ -207,6 +207,10 @@ export const taskToolDefinitions = [
           type: "string",
           description: "ID (slug) of the user to assign, e.g. 'mario-neto'",
         },
+        team_id: {
+          type: "number",
+          description: "ID of the team",
+        },
       },
       required: ["task_id", "assignee_id"],
     },
@@ -397,9 +401,13 @@ export async function handleTaskTool(name: string, args: ToolArgs) {
       if (!task_id) throw new Error("task_id is required");
       if (!assignee_id) throw new Error("assignee_id is required");
 
-      const data = await runrunitFetch(`/tasks/${task_id}/assignments`, {
+      const team_id = args?.["team_id"] as number | undefined;
+      const assignment: Record<string, unknown> = { assignee_id };
+      if (team_id !== undefined) assignment["team_id"] = team_id;
+
+      const data = await runrunitFetch(`/tasks/${task_id}/create_assignments`, {
         method: "POST",
-        body: JSON.stringify({ task_assignment: { assignee_id } }),
+        body: JSON.stringify({ assignments: [assignment] }),
       });
 
       return {
