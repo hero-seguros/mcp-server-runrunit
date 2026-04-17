@@ -229,6 +229,24 @@ export const taskToolDefinitions = [
       required: ["task_id", "body"],
     },
   },
+  {
+    name: "change_task_board",
+    description: "Move a task to a different board in Runrun.it.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task_id: {
+          type: "number",
+          description: "The ID of the task",
+        },
+        board_id: {
+          type: "number",
+          description: "The ID of the board to move the task to",
+        },
+      },
+      required: ["task_id", "board_id"],
+    },
+  },
 ] as const;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -414,6 +432,22 @@ export async function handleTaskTool(name: string, args: ToolArgs) {
 
       return {
         content: [{ type: "text", text: JSON.stringify(descData, null, 2) }],
+      };
+    }
+
+    case "change_task_board": {
+      const task_id = args?.["task_id"] as number | undefined;
+      const board_id = args?.["board_id"] as number | undefined;
+      if (!task_id) throw new Error("task_id is required");
+      if (!board_id) throw new Error("board_id is required");
+
+      const data = await runrunitFetch(`/tasks/${task_id}/change_board`, {
+        method: "POST",
+        body: JSON.stringify({ board_id }),
+      });
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
       };
     }
 
